@@ -1,0 +1,33 @@
+commands:
+  taylor:
+    description: stabe_diffusion绘图插件
+
+    options:
+      step: 采样步数数字0-150
+      resolution: 设定图片比例(1200x800)
+      seed: 设置随机种子(随意一个数字)
+      cfg-scale: 提示词相关性(0-20)
+      denoising_strength: 图片修改强度(0-1)
+      negative_prompt: 反向提示词
+
+    messages:
+      no-args: |-
+        请发送描述词, 示例: 
+        文字绘图: taylor 英文描述
+        识图: taylor 图片
+        以图绘图: taylor 参数 图片
+      latin-only: 只接受英文输入。
+      concurrent-jobs@random:
+        - 住手，快住手(>﹏<)
+        - 已经停止了思考(^-^)~
+      waiting@random:
+        - 喵喵喵(≧∇≦)
+        - 现在是^_−☆绘画时间~
+      pending: 已加入列队，前面还有 {0} 个任务……
+      bad-steep: 步数不能大于100(>﹏<)
+      args: |-
+        描述词: {0}
+        比例: {1}x{2}
+        采样步数: {3}
+        种子: {4}
+        相关性: {5}
