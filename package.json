@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-sd-taylor",
-  "description": "stabe_diffusion绘图插件",
-  "version": "1.0.0",
+  "description": "[stabe_diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API)绘图插件,[github](https://github.com/initialencounter/koishi-plugin-sd-taylor)源码",
+  "version": "1.2.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -19,3 +19,4 @@
     "koishi": "^4.10.10"
   }
 }
+
