@@ -7,7 +7,9 @@
 QQ群399899914
 
 [作者b站](https://space.bilibili.com/225995995)
-
+## 感谢
+[novelai-bot](https://github.com/koishijs/novelai-bot)
+[MirrorCY-rryth](https://github.com/MirrorCY/rryth)(直接抄）
 ## txt2img 文字绘图
 ![alt 文字转图片](https://c2cpicdw.qpic.cn/offpic_new/3118087750//3118087750-128802214-71B2F9EA6EE2CB7E69498F902059E572/0?term=3&amp;is_origin=1)
 
