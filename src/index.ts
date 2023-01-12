@@ -58,13 +58,29 @@ export function prompt_parse(s) {
   }
   return s
 }
+
+export async function img2base64(ctx,img_url){
+  const buffer = await ctx.http.get(img_url, { responseType: 'arraybuffer', headers })
+  const base64 = Buffer.from(buffer).toString('base64')     
+  return base64
+}
+
+export function extras_dc(s,width,height){
+  const extras_arr:any[] = [4,1]
+  for(var  i in s.split(',')){
+
+  }
+  return []
+}
 export function apply(ctx: Context, config: Config) {
   ctx.i18n.define('zh', require('./locales/zh'))
 
 
   const tasks: Dict<Set<string>> = Object.create(null)
   const globalTasks = new Set<string>()
-
+  // {
+    
+  // }
 
   ctx.command('taylor <prompt:text>')
     .alias(config.cmd)
@@ -74,6 +90,12 @@ export function apply(ctx: Context, config: Config) {
     .option('negative_prompt', '-n <negative_prompt:string>', { fallback: config.negative_prompt })
     .option('resolution', '-r <resolution:string>', { fallback: config.resolution })
     .option('cfg_scale', '-c <cfg_scale:number>', { fallback: config.cfg_scale })
+    .option('extras','-e <extras:string>')
+    .option('crop', '-C, --no-crop', { value: false, fallback: true })
+    .option('upscaler', '-1 <upscaler>', { fallback: 'None'})
+    .option('upscaler2', '-2 <upscaler2>', { fallback: 'None' })
+    .option('visibility', '-v <visibility:number>',{ fallback : 1})
+    .option('upscaleFirst', '-f', { fallback: false })
     .action(async ({ session, options },prompt) => {
       if (!prompt?.trim()){
         return session.text('.no-args')
@@ -101,10 +123,6 @@ export function apply(ctx: Context, config: Config) {
       var img_url: string
       const [width, height]: number[] = options.resolution.split('x').map(Number)
 
-      const attrs: Dict<any, string> = {
-        userId: session.userId,
-        nickname: session.author?.nickname || session.username,
-      }
       // 设置参数
       const payload: object = {
         "steps": options.step,
@@ -116,11 +134,13 @@ export function apply(ctx: Context, config: Config) {
         "denoising_strength": options.denoising_strength,
         "prompt": prompt_text + ', ' + config.defaut_prompt
       }
+      // 中文检查
+      if (isChinese(prompt_text)) {
+        return session.text('.latin-only')
+      }
       //判断api
       if (session.content.indexOf('<image file="') == -1) {
-        if (isChinese(prompt_text)) {
-          return session.text('.latin-only')
-        }
+      
         api = '/sdapi/v1/txt2img'
         payload["negative_prompt"] = options.negative_prompt
 
@@ -130,31 +150,56 @@ export function apply(ctx: Context, config: Config) {
         var resp = await ctx.http.post(`${config.api_path}${api}`, payload, headers)
         
         cleanUp()
-        return `种子:${findInfo(resp.info,'Seed')}`+segment.image('base64://' + resp.images[0].replace(/^data:image\/[\w-]+;base64,/, ''))
+        return `种子:${findInfo(resp.info,'Seed')}`+segment.image("data:image/png;base64," + resp.images[0].replace(/^data:image\/[\w-]+;base64,/, ''))
       } else {
         
         // url提取拼接
         var regexp = /url="[^,]+"/;
         img_url = session.content.match(regexp)[0].slice(5, -1)
         // 将图片url转化成base64数据
-        const buffer = await ctx.http.get(img_url, { responseType: 'arraybuffer', headers })
-        const base64 = Buffer.from(buffer).toString('base64')
-        if (!prompt) {
-          var resp3 = await ctx.http.post(`${config.api_path}/sdapi/v1/interrogate`, { "image": "data:image/png;base64," + base64 })
-          cleanUp()
-          return segment.image('base64://' + base64) + '图片信息:\n' + resp3.caption
+        
+        if (!prompt_text) {
+          if(options.extras){
+            session.send(session.text('.waiting'))
+            const base64: string = await img2base64(ctx,img_url)
+            const payload_extras: object = {
+              "image": "data:image/png;base64," + base64,
+              "resize_mode": 1,
+              "show_extras_results": true,
+              "upscaling_resize": 2,
+              "upscaling_resize_w": width,
+              "upscaling_resize_h": height,
+              "upscaling_crop": options.crop,
+              "upscaler_1": options.upscaler,
+              "upscaler_2": options.upscaler2,
+              "extras_upscaler_2_visibility": options.visibility,
+              "upscale_first": options.upscaleFirst,
+              
+            }
+            console.log(payload_extras)
+            var resp4 = await ctx.http.post(`${config.api_path}/sdapi/v1/extra-single-image`, payload_extras)
+            console.log(resp4)
+            cleanUp()
+            return segment.image('data:image/png;base64,' + resp4.image)
+          }
+          else{
+            session.send(session.text('.interrogate'))
+            const base64: string = await img2base64(ctx,img_url)
+            var resp3 = await ctx.http.post(`${config.api_path}/sdapi/v1/interrogate`, { "image": "data:image/png;base64," + base64 })
+            cleanUp()
+            return segment.image('data:image/png;base64,' + base64) + '图片信息:\n' + resp3.caption
+          }
         } else {
           api = '/sdapi/v1/img2img'
-
+          session.send(session.text('.waiting') + '\n\n' + session.text('.args', [prompt_text, width, height, options.step, options.seed, options.cfg_scale]))
+          const base64: string = await img2base64(ctx,img_url)
           // 设置payload
           payload["init_images"] = ["data:image/png;base64," + base64]
-          session.send(session.text('.waiting') + '\n\n' + session.text('.args', [prompt_text, width, height, options.step, options.seed, options.cfg_scale]))
           var resp2 = await ctx.http.post(`${config.api_path}${api}`, payload, headers)
           cleanUp()
-          return '原图:' + segment.image('base64://' + base64) + `种子:${findInfo(resp2.info,'Seed')}\n\n结果:` + segment.image('base64://' + resp2.images[0].replace(/^data:image\/[\w-]+;base64,/, ''))
+          return '原图:' + segment.image("data:image/png;base64," + base64) + `种子:${findInfo(resp2.info,'Seed')}\n\n结果:` + segment.image('data:image/png;base64,' + resp2.images[0])
         }
       }
 
     })
 }
-
