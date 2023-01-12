@@ -9,6 +9,11 @@ commands:
       cfg-scale: 提示词相关性(0-20)
       denoising_strength: 图片修改强度(0-1)
       negative_prompt: 反向提示词
+      extras: 
+      upscaling_crop: 未知参数
+      upscaler_1: 未知参数
+      extras_upscaler_2_visibility: 明显性(0-1)
+      upscale_first": 未知参数(ture of false)
 
     messages:
       no-args: |-
@@ -23,6 +28,7 @@ commands:
       waiting@random:
         - 喵喵喵(≧∇≦)
         - 现在是^_−☆绘画时间~
+      interrogate: 识别中～
       pending: 已加入列队，前面还有 {0} 个任务……
       bad-steep: 步数不能大于100(>﹏<)
       args: |-
