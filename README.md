@@ -20,3 +20,8 @@ QQ群399899914
 
 ## interrogate 识图
 ![alt 识图](https://c2cpicdw.qpic.cn/offpic_new/3118087750//3118087750-713324925-26882C0407D29DC9678681D2F965E364/0?term=3&amp;is_origin=1)
+
+
+
+## extra-single-image 超分辨率
+![alt 超分辨率](https://c2cpicdw.qpic.cn/offpic_new/3118087750//3118087750-840623233-B28DB7E9250844D3F37BC82324D900AE/0?term=3&amp;is_origin=0)
